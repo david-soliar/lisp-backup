@@ -23,6 +23,13 @@
 (defun power5 (a)
   (* a a a a a))
 
+(defun power-i (a i)
+  (if (<= i 1)
+      (if (= i 0)
+          1
+        a)
+    (* a (power-i a (- i 1)))))
+
 ;2_5
 (defun hypotenuse (a b)
   (sqrt (+ (* a a)
@@ -158,4 +165,145 @@
       0
     (+ a (sum-of-n-elements (1+ a) b))))
 
+;3_13
+(defun digit-count (n)
+  (if (and (<= 0 n)
+           (<= n 10))
+      1
+    (+ 1 (digit-count (/ n 10)))))
+
+(defun digit (n i)
+  (if (< i (digit-count n))
+      (- (floor (/ n
+                   (power-i 10
+                            i)))
+         (* (floor (/ n
+                      (power-i 10
+                               (+ i 1))))
+            10))
+    nil))
+; idk ako to ma byt tak ak je i viac ako pocet cislic
+; teda i je od 0 takze musi byt count vacsi ako i
+; inak vrati NIL
+
 ;3_14
+(defun leibniz-iter (pseudo-pi x e)
+  (if (approx-= pi (* 4 pseudo-pi) e)
+      (* 4.0 pseudo-pi)
+    (let ((x (* (/ x
+                   (abs x)
+                   -1)
+                (+ 2 (abs x))))
+          (pseudo-pi (+ pseudo-pi
+                        (/ 1 x))))
+    (leibniz-iter pseudo-pi x e))))
+
+(defun leibniz (e)
+  (leibniz-iter 1 -3 e))
+
+;4_2
+;n=0 --> ir
+;
+;n%2=1 -> a**2 n/2 ir
+;
+;n%2=0 --> a n-1 a*ir
+(defun fast-power-iter (a n ir)
+  (cond((= n 0) ir)
+       ((not (evenp n)) (fast-power-iter a (- n 1) (* a ir)))
+       ((evenp n) (fast-power-iter (power2 a) (/ n 2) ir)))); teoreticky aj t lebo vzdy ked nie je %2 nie je %2 yeah
+
+(defun fast-power (a n)
+  (fast-power-iter a n 1))
+
+;pisomka je z rec1 a rec2 teda 03 a 04 lecture
+
+;4_3
+(defun dividesp (a b)
+  (if (= (rem b a) 0)
+      t
+    nil))
+
+;4_4
+(defun dividesp-iter (a b)
+  (cond ((= b 0) t)
+        ((< b 0) nil)
+        (t (dividesp-iter a
+                          (- b a))))
+  )
+
+(defun dividesp1 (a b)
+  (dividesp-iter (abs a) (abs b)))
+
+;4_5
+(defun primep-iter (a b)
+  (if (= b 1) 
+      t
+    (and (not (= (rem a b)
+                 0))
+         (primep-iter a (1- b)))))
+
+(defun primep (a)
+  (primep-iter a (1- a)))
+
+(defun primep1-iter (a b)
+  (cond ((= b 1) t)
+        ((= (rem a b) 0) nil)
+        (t (primep1-iter a (1- b)))))
+
+(defun primep1 (a)
+  (cond ((<= a 1) nil)
+        (t (primep1-iter a (1- a)))))
+
+;4_6
+(defun perfectp-iter (b a)
+  (cond ((= b a) 0)
+        (t (+ (if (= (rem a b)
+                      0)
+                  b
+                0)
+              (perfectp-iter (1+ b) a)))))
+
+(defun perfectp (a)
+  (if (= a (perfectp-iter 1 a))
+      t
+    nil))
+
+;4_7
+(defun pascal (y x)
+  (cond ((< y x) 0)
+        ((= x 0) 1)
+        ((= y 0) 1)
+        (t (+ (pascal (1- y) (1- x))
+              (pascal (1- y) x)))))
+
+;4_8
+(defun sum-of-squares-p (a)
+  (sum-of-squares-p-iter a a))
+
+(defun sum-of-squares-p-iter (a b)
+  (cond ((= a 0) t)
+        ((or (< a 0)
+             (< b 0)) nil)
+        (t (or (sum-of-squares-p-iter a
+                                      (1- b))
+               (sum-of-squares-p-iter (- a
+                                         (* b b))
+                                      (1- b))))))
+
+;4_9
+(defun fib (n)
+  (cond ((= n 0) 0)
+        ((= n 1) 1)
+        (t (+ (fib (- n 2)) (fib (- n 1))))))
+
+(defun fib2-iter (a b i n)
+  (cond ((= n 0) 0)
+        ((= n i) b)
+        ((fib2-iter b
+                    (+ a b)
+                    (1+ i)
+                    n))))
+
+(defun fib2 (n)
+  (fib2-iter 0 1 1 n))
+
