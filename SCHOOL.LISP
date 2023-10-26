@@ -160,6 +160,12 @@
   (heron-sqrt-iter a 1 epsilon))
 
 ;3_11
+(defun sum-of-n-elements-naive (a b)
+  (/ (* (1+ (- b a))
+        (+ a b))
+     2))
+
+;3_12
 (defun sum-of-n-elements (a b)
   (if (> a b)
       0
@@ -182,9 +188,24 @@
                                (+ i 1))))
             10))
     nil))
-; idk ako to ma byt tak ak je i viac ako pocet cislic
-; teda i je od 0 takze musi byt count vacsi ako i
-; inak vrati NIL
+
+(defun sum-of-digits (n i d ir)
+  (if (= i d)
+      ir
+    (sum-of-digits n (1+ i) d ir)))
+
+(defun is-divisible-nine-iter (n x i)
+  (cond ((< n (* i 9)) nil)
+        ((= (* i 9) n) t)
+        (t (is-divisible-nine-iter n x (1+ i)))))
+
+(defun is-divisible-nine (n)
+  (is-divisible-nine-iter n
+                          (sum-of-digits n
+                                         0
+                                         (digit-count n)
+                                         0)
+                          1))
 
 ;3_14
 (defun leibniz-iter (pseudo-pi x e)
@@ -214,8 +235,6 @@
 
 (defun fast-power (a n)
   (fast-power-iter a n 1))
-
-;pisomka je z rec1 a rec2 teda 03 a 04 lecture
 
 ;4_3
 (defun dividesp (a b)
@@ -307,3 +326,110 @@
 (defun fib2 (n)
   (fib2-iter 0 1 1 n))
 
+;5_1
+(defun right-triangle-p (A B C)
+  (let ((ab2 (+ (expt (- (car A) (car B)) 2)
+               (expt (- (cdr A) (cdr B)) 2)))
+        (ac2 (+ (expt (- (car A) (car C)) 2)
+               (expt (- (cdr A) (cdr C)) 2)))
+        (bc2 (+ (expt (- (car B) (car C)) 2)
+               (expt (- (cdr B) (cdr C)) 2))))
+    (or (= ab2 (+ ac2 bc2))
+        (= ac2 (+ ab2 bc2))
+        (= bc2 (+ ab2 ac2)))
+))
+
+;5_2
+(defun mid-point (A B)
+  (cons (/ (+ (car A) (car B))
+           2)
+        (/ (+ (cdr A) (cdr B))
+           2)))
+
+(defun op-vertex (A B)
+  (cons (- (* 2 (car B))
+           (car A))
+        (- (* 2 (cdr B))
+           (cdr A))))
+
+;5_3
+
+(defun fraction (n d)
+  (let ((div (gcd n d)))
+    (cons (/ n div) (/ d div))))
+
+(defun fraction- (A B)
+  (fraction (- (* (car A) (cdr B))
+               (* (cdr A) (car B)))
+            (* (cdr A)
+               (cdr B))))
+
+;5_5
+(defun interval (a b)
+  (cond ((> a b) nil)
+        ((= a b) (cons a nil))
+        (t (cons a (interval (1+ a) b)))))
+
+(defun lower-bound (x)
+  (car x))
+
+(defun upper-bound (x)
+  (if (eql (cdr x) nil) ;bruh eql coz = je len na cisla bruh
+      (car x)
+    (upper-bound (cdr x))))
+
+(defun number-in-interval-p (n X)
+  (cond ((eql n (car X)) t)
+        ((eql nil (cdr X)) nil)
+        (t (number-in-interval-p n (cdr X)))))
+
+(defun interval-intersection-iter (A B)
+  (cond ((number-in-interval-p (lower-bound A) B)
+         (cons (lower-bound A)
+               (interval-intersection-iter (cdr A) B)))
+        ((eql A nil) nil)
+        (t (interval-intersection-iter (cdr A) B))))
+
+(defun interval-intersection (A B)
+  (if (or (number-in-interval-p (upper-bound A) B)
+          (number-in-interval-p (lower-bound A) B))
+      (interval-intersection-iter A B)
+    nil))
+
+;5_6
+(defun practice-5-6 ()
+  (cons 1 (cons (cons 3 4)
+                (cons (cons 3 4)
+                      (cons 2 nil)))))
+
+;5_7
+;(defun proper-list-p (X)
+;  )
+
+;5_8
+(defun my-make-list-iter (i elem)
+  (if (= i 0)
+      nil
+    (cons elem
+          (my-make-list-iter (1- i) elem))))
+
+(defun my-make-list (length elem)
+  (my-make-list-iter length elem))
+
+;5_9
+(defun make-ar-seq-list (a d i)
+  (if (= i 0)
+      nil
+    (cons a
+          (make-ar-seq-list (+ a d) d (1- i)))))
+
+;5_10 ar-seq-iter
+
+;5_11
+(defun make-geom-seq-list (a q i)
+  (if (= i 0)
+      nil
+    (cons a
+          (make-geom-seq-list (* a q) q (1- i)))))
+
+;5_12 geom-seq-iter
