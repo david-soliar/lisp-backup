@@ -192,7 +192,7 @@
 (defun sum-of-digits (n i d ir)
   (if (= i d)
       ir
-    (sum-of-digits n (1+ i) d ir)))
+    (sum-of-digits n (1+ i) d (+ ir (digit n i)))))
 
 (defun is-divisible-nine-iter (n x i)
   (cond ((< n (* i 9)) nil)
@@ -353,7 +353,6 @@
            (cdr A))))
 
 ;5_3
-
 (defun fraction (n d)
   (let ((div (gcd n d)))
     (cons (/ n div) (/ d div))))
@@ -383,28 +382,53 @@
         ((eql nil (cdr X)) nil)
         (t (number-in-interval-p n (cdr X)))))
 
-(defun interval-intersection-iter (A B)
+(defun interval-intersection (A B)
   (cond ((number-in-interval-p (lower-bound A) B)
          (cons (lower-bound A)
-               (interval-intersection-iter (cdr A) B)))
+               (interval-intersection (cdr A) B)))
         ((eql A nil) nil)
-        (t (interval-intersection-iter (cdr A) B))))
-
-(defun interval-intersection (A B)
-  (if (or (number-in-interval-p (upper-bound A) B)
-          (number-in-interval-p (lower-bound A) B))
-      (interval-intersection-iter A B)
-    nil))
+        (t (interval-intersection (cdr A) B))))
 
 ;5_6
 (defun practice-5-6 ()
-  (cons 1 (cons (cons 3 4)
-                (cons (cons 3 4)
-                      (cons 2 nil)))))
+  (let ((pair (cons 3 4)))
+    (cons 1 (cons pair (cons pair 2)))))
+
+
+;(let ((pair) (cons 3 4)))
+;(cons 1 (cons pair (cons pair 2)))
+;
+
+(defun practice-5-6-2 ()
+  (let ((pair-1 (cons 3 (cons 6 nil)))
+        (pair-2 (cons 4 (cons 9 nil))))
+    (cons pair-1 pair-2)))
+
+(defun practice-5-6-3 ()
+  (cons (cons 3
+              (cons 6
+                    nil))
+        (cons 4
+              (cons 9
+                    nil))))
 
 ;5_7
+
+;(defun proper-list-p-iter (X n)
+;  (cond ((and (eql (cdr X) nil)
+;              (= n 1)) t)
+;        ((= n 0) nil)
+;        (t (proper-list-p-iter (cdr X) (1- n)))))
+;
 ;(defun proper-list-p (X)
-;  )
+;  (if (and (eql X nil)
+;           (= 0 (length X)))
+;      t
+;  (proper-list-p-iter X (length X))))
+
+;(defun proper-list-p (X)
+;  (eql (last X 0) nil))
+;proper list je dole od krupku
 
 ;5_8
 (defun my-make-list-iter (i elem)
@@ -424,6 +448,20 @@
           (make-ar-seq-list (+ a d) d (1- i)))))
 
 ;5_10 ar-seq-iter
+(defun make-ar-seq-list-iter (a d i ir)
+  (cond ((= i 0) (cons a ir))
+        ((< i 0) ir)
+        (t (make-ar-seq-list-iter a
+                                  d
+                                  (1- i)
+                                  (cons (+ a (* i d))
+                                        ir)))))
+
+(defun make-ar-seq-list2 (a d i)
+  (make-ar-seq-list-iter a
+                         d
+                         (- i 1)
+                         nil))
 
 ;5_11
 (defun make-geom-seq-list (a q i)
@@ -433,3 +471,286 @@
           (make-geom-seq-list (* a q) q (1- i)))))
 
 ;5_12 geom-seq-iter
+(defun make-geom-seq-list-iter (a q i ir)
+  (cond ((= i 0) (cons a ir))
+        ((< i 0) ir)
+        (t (make-geom-seq-list-iter a
+                                    q
+                                    (1- i)
+                                    (cons (* a (expt q i))
+                                          ir)))))
+
+(defun make-geom-seq-list2 (a q i)
+  (make-geom-seq-list-iter a
+                           q
+                           (1- i)
+                           nil))
+
+;nuh uh pisomka recc asi A som bol
+(defun delitelne-i (a b)
+  (cond ((= a 0) t)
+        ((< a 0) nil)
+        (t (delitelne-i (- a b) b))))
+
+;;;;;;;
+(defun proper-list-p (x)
+  (or (null x)
+      (and (consp x)
+           (proper-list-p (cdr x)))))
+
+(defun my-nth (n list) 
+  (if (= n 0)
+      (car list)
+    (my-nth (- n 1) (cdr list))))
+
+(defun my-nthcdr (n list) 
+  (if (= n 0)
+      list
+    (my-nthcdr (- n 1) (cdr list))))
+
+(defun append-2 (list1 list2)
+  (if (null list1)
+      list2
+    (cons (car list1) 
+          (append-2 (cdr list1) list2))))
+
+(defun my-revappend (list1 list2)
+  (if (null list1)
+      list2
+    (my-revappend (cdr list1)
+                  (cons (car list1) list2))))
+
+(defun my-reverse (list)
+  (my-revappend list ()))
+
+(defun even-conses (list)
+  (if (null list)
+      ()
+    (cons (car list) (odd-conses (cdr list)))))
+
+(defun odd-conses (list)
+  (if (null list)
+      ()
+    (even-conses (cdr list))))
+
+(defun scale-list (list factor) 
+  (if (null list)
+      ()
+    (cons (* factor (car list))
+          (scale-list (cdr list) factor))))
+
+(defun sum-lists-2 (list1 list2) 
+  (if (null list1)
+      ()
+      (cons (+ (car list1) (car list2))
+            (sum-lists-2 (cdr list1) (cdr list2)))))
+
+(defun elementp (x list)
+  (and (not (null list))
+       (or (eql x (car list))
+           (elementp x (cdr list)))))
+
+(defun my-subsetp (list1 list2)
+  (or (null list1)
+      (and (elementp (car list1) list2)
+           (my-subsetp (cdr list1) list2))))
+
+(defun my-intersection (list1 list2)
+  (cond ((null list1) ())
+        ((elementp (car list1) list2) 
+         (cons (car list1)
+               (intersection (cdr list1) list2)))
+        (t (intersection (cdr list1) list2))))
+
+(defun subsets (list)
+  (if (null list)
+      (list ())
+    (let ((cdr-subsets (subsets (cdr list))))
+      (append-2 cdr-subsets
+                (add-to-all (car list) cdr-subsets)))))
+
+(defun add-to-all (elem list)
+  (if (null list)
+      ()
+    (cons (cons elem (car list)) (add-to-all elem (cdr list)))))
+
+(defun merge-sort (list) 
+  (let ((list1 (even-conses list))
+        (list2 (odd-conses list)))
+    (if (or (null list) (null (cdr list)))
+        list
+      (merge-lists (merge-sort list1) (merge-sort list2)))))
+
+(defun merge-lists (l1 l2)
+  (cond ((null l1) l2)
+        ((null l2) l1)
+        ((<= (car l1) (car l2)) 
+         (cons (car l1) (merge-lists (cdr l1) l2)))
+        (t (cons (car l2) (merge-lists l1 (cdr l2))))))
+;;;;;;;
+
+;6_1
+(defun last-pair (l)
+  (if (null (cdr l))
+      l
+    (last-pair (cdr l))))
+
+;6_2
+(defun my-copy-list (l)
+  (if (null l)
+      nil
+    (cons (car l) (my-copy-list (cdr l)))))
+
+;6_3
+(defun equal-lists-p (L1 L2)
+  (or (and (null L1) (null L2))
+      (and (eql (car L1) (car L2))
+           (equal-lists-p (cdr L1) (cdr L2)))))
+
+;6_4
+(defun my-remove (x l)
+  (cond ((null l) nil)
+        ((eql x (car l)) (my-remove x (cdr l)))
+        (t (cons (car l) (my-remove x (cdr l))))))
+
+;6_5
+(defun remove-nthcdr (n l)
+  (if (= n 0)
+      (cons nil (cdr l))
+    (cons (car l) (remove-nthcdr (1- n) (cdr l)))))
+
+;6_6
+(defun each-other (l)
+  (cond ((null l) nil)
+        ((null (cddr l)) (cons (car l) nil))
+        (t (cons (car l) (each-other (cddr l))))))
+
+;6_7
+(defun factorials-iter (n i last)
+  (if (= n i)
+      nil
+    (let ((last (* last i)))
+      (cons last (factorials-iter n (1+ i) last)))))
+
+(defun factorials (n)
+  (cons 1 (factorials-iter n 1 1)))
+
+;6_8
+(defun fib-list-iter (a b n)
+  (if (= n 0)
+      nil
+    (cons b (fib-list-iter b (+ a b) (1- n)))))
+
+(defun fib-list (n)
+  (cons 0 (fib-list-iter 0 1 n)))
+
+;6_9
+(defun list-tails (l)
+  (if (null l)
+      (cons nil nil)
+    (cons l (list-tails (cdr l)))))
+
+;6_10
+(defun list-sum (l)
+  (if (null l)
+      0
+    (+ (car l) (list-sum (cdr l)))))
+
+;6_12
+(defun subtract-lists-2 (a b)
+  (if (and (null a)
+           (null b))
+      nil
+    (cons (- (car a) (car b))
+          (subtract-lists-2 (cdr a) (cdr b)))))
+
+;6_13
+(defun scalar-product (a b)
+  (if (and (null a)
+           (null b))
+      0
+    (+ (* (car a) (car b))
+       (scalar-product (cdr a) (cdr b)))))
+
+;6_14
+(defun list-sum-pow2 (a)
+  (if (null a)
+      0
+    (+ (expt (car a) 2)
+       (list-sum-pow2 (cdr a)))))
+
+(defun vector-length (a)
+  (sqrt (list-sum-pow2 a)))
+
+;6_15
+(defun first-index (x l)
+  (first-index-iter l (length l) 0 x))
+
+(defun first-index-iter (l n i x)
+  (cond ((null l) nil)
+        ((eql x (car l)) i)
+        (t (first-index-iter (cdr l) n (1+ i) x))))
+
+(defun my-remove-duplicates-iter (l lf)
+  (cond ((null l) 
+         lf)
+        ((null (first-index (car l) lf))
+         (my-remove-duplicates-iter (cdr l)
+                                    (cons (car l)
+                                          lf)))
+        (t (my-remove-duplicates-iter (cdr l) lf))))
+
+(defun my-remove-duplicates (l)
+  (my-remove-duplicates-iter l nil))
+
+;6_16
+(defun my-union-iter (a x b)
+  (cond ((and (null a)
+              (null b)) 
+         x)
+        ((null a)
+         (my-union-iter b x a))
+        ((null (first-index (car a) x))
+         (my-union-iter (cdr a) (cons (car a) x) b))
+        (t
+         (my-union-iter (cdr a) x b))))
+
+(defun my-union (a b)
+  (my-union-iter a nil b))
+
+;6_17
+;equal-lists-p ? uz sa robila v ulohe 2 ci kolko
+
+;6_18
+(defun mnozina (l)
+  (merge-sort (my-remove-duplicates l)))
+
+;6_19
+(defun flatten-iter (l x)
+  (cond ((null l)
+         x)
+        ((consp (car l))
+         (flatten-iter (cdr l)
+                       (flatten-iter (car l)
+                                     x)))
+        (t 
+         (flatten-iter (cdr l) 
+                       (cons (car l) x)))))
+
+(defun flatten (l)
+  (mnozina (flatten-iter l nil)))
+
+;6_20
+(defun deep-reverse-iter (l x)
+  (cond ((null l)
+         x)
+        ((consp (car l))
+         (deep-reverse-iter (cdr l)
+                            (cons (deep-reverse-iter (car l) nil)
+                                  x)))
+        (t 
+         (deep-reverse-iter (cdr l) 
+                            (cons (car l) x)))))
+
+(defun deep-reverse (l)
+  (deep-reverse-iter l nil))
