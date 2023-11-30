@@ -533,11 +533,13 @@
       ()
     (even-conses (cdr list))))
 
+#|
 (defun scale-list (list factor) 
   (if (null list)
       ()
     (cons (* factor (car list))
           (scale-list (cdr list) factor))))
+|#
 
 (defun sum-lists-2 (list1 list2) 
   (if (null list1)
@@ -982,3 +984,129 @@
 ;ta 7_7 mapcar tak podobne ako tu hore ze prechadza naraz tie listy 
 ;a ak jeden skoncill tak tam drzi nil a pri napr + tak namiesto nil pocita s nulou a * s 1
 ;teda to moze brat tu funkciu #"+ a #"* doslova ako hodnotu za nil lebo to je 1 a 0
+
+(defun always (list)
+  (cond ((null list) t)
+        ((eql (car list) t) (always (cdr list)))
+        (t nil)))
+
+(defun some-t (list)
+  (cond ((null list) nil)
+        ((eql (car list) t) t)
+        (t (some-t (cdr list)))))
+
+(defun sum-list (list)
+  (if (null list)
+      0
+    (+ (car list)
+       (sum-list (cdr list)))))
+
+
+(defun my-mapcar (fun list)
+  (labels ((help (elem acum)
+             (cons (funcall fun elem)
+                   acum)))
+    (foldr #'help list '())))
+
+;8_1
+;(funcall (lambda (x) (funcall x 10)) (lambda (x) 20))
+#|
+posledna lambda je cela ta zatvorka vstup
+pre prvu lambdu teda je to x
+a stredna lambda zavola tu lambdu a teda jej vstup bude 
+x=10 ale tak ci tak vracia 20 takze vysledok je 20
+|#
+
+;8_2
+;???
+
+;8_3
+(defun scale-list (list factor)
+  (labels ((prod (x) (* x factor)))
+    (my-mapcar #'prod list)))
+#|
+z global sa dostaneme do prostredia fun scale-list
+vytvori sa lokal prostredie v labels s lokal funkcnou hodn. prod
+zavola sa my-mapcar ulozi sa fun ako prod (funkcna hodn.)
+vytvori sa lokal help fun v labels a zavola sa foldr
+a zacne sa stackovat foldr az dokym nedojde na koniec a potom 
+zacne vracat vyhodnocovanie (zakazdym sa vytvori prostredie
+funkcie labels pre fun s hodnotami ake prijima, vyhodnoti a zanik) 
+az dokedy sa nevrati po prvy foldr
+ten sa vrati do my-mapcar, medzitym zanikli uz pocas 
+spatneho vyhodnocovania vsetky foldr prostredia, a my-mapcar 
+to vrati do scale-list, zanikne, a ten do listeneru a zanikne
+|#
+
+;8_4
+;bruh
+
+;8_5
+(defun my-cons (x y)
+  (lambda (c) (if c x y)))
+(defun my-car (cons)
+  (funcall cons t))
+(defun my-cdr (cons)
+  (funcall cons nil))
+;mali by fungovat kedze my-cons napr 5 4 by mal vracat
+;funkciu s ulozenymi premennymi teda ten closure
+;a my-cdr/car vlozi do lambdy t/nil a ta vrati nieco
+;(my-cons 5 4)
+;(my-car *)
+
+;8_6
+(defun mem (seq index)
+  (funcall seq index))
+
+(defun seq-to-list (seq len)
+  (labels ((stl (index)
+             (if (>= index len)
+                 '()
+               (cons (mem seq index)
+                     (stl (+ index 1))))))
+    (stl 0)))
+
+; (seq-to-list (lambda (x) (* x x)) 20)
+
+(defun constant-seq-p (seq x)
+  (cond ((= (1- x) 0) t)
+        ((= (mem seq (- x 2))
+            (mem seq (1- x)))
+         (constant-seq-p seq (1- x)))
+        (t nil)))
+
+;8_7
+(defun increasing-seq-p (seq k)
+  (labels ((iter (list)
+             (or (null (cdr list))
+                 (and (< (car list) (cadr list))
+                      (iter (cdr list))))))
+    (iter (seq-to-list seq k))))
+
+;8_8
+(defun from-nth (seq i)
+  (lambda (n) (mem seq (+ n i))))
+
+;8_9
+(defun even-members (seq)
+  (lambda (n) (mem seq (* 2 n))))
+
+;8_10
+(defun tbl (seq)
+  (labels ((get-index (row column)
+             (mem seq (+ column
+                         (* 10 row)))))
+    #'get-index))
+
+(defun zero-row-p (fun i)
+  (labels ((zeros (x)
+             (or (= x 10)
+                 (and (= 0 (funcall fun i x))
+                      (zeros (1+ x))))))
+    (zeros 0)))
+
+;8_11
+(defun transpose-table (table)
+  (labels ((get-index (row column)
+             (funcall table column row)))
+    #'get-index))
