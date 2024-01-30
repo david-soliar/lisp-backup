@@ -1,0 +1,15 @@
+(defun last-n (list n)
+  (labels ((iter (lst)
+             (if (null lst)
+                 (cons 0 nil)
+               (let ((sub (iter (cdr lst))))
+                 (if (= (car sub) n)
+                     sub
+                   (cons (1+ (car sub))
+                         (cons (car lst) (cdr sub))))))))
+    (cdr (iter list))))
+
+(defun every (p list)
+  (or (null list)
+      (and (funcall p (car list))
+           (every p (cdr list)))))
